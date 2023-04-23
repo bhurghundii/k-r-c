@@ -1,127 +1,80 @@
 #include <stdio.h>
 
-#define REMOVE_COMMENTS = 0
-#define BALANCE_PARENTHESIS = 0
-#define BALANCE_BRACES = 0
-#define BALANCE_BRACKETS = 0
+int checkSyntax(char entry, char end, char line[], int score);
 
-int checkParenthesis(char line[], int score);
-int removeComments(char line[], int insideMultilineComment);
+void idkwhattocallthis(char start, char end, FILE * filePointer);
+
+// limitations: cba to do the others x  
 
 int main()
 {
     FILE *filePointer;
-    int lineLength = 1024;
+    filePointer = fopen("file.c", "rb");
+
+    idkwhattocallthis('{', '}', filePointer);
+
+}
+
+void idkwhattocallthis(char start, char end, FILE * filePointer) {
+
+    int lineLength = 200;
     char line[lineLength];
+    
 
-    char code[lineLength];
-
-    fclose(fopen("tmp.txt", "w"));
-
-    // Scrub comments cause we don't care
-
-    filePointer = fopen("file.c", "r");
-
-    int insideMultilineComment = 0;
+    int score = 0;
 
     while (fgets(line, lineLength, filePointer))
     {
-        insideMultilineComment = removeComments(line, insideMultilineComment);
+        score = checkSyntax(start, end, line, score);
+    }
+
+    if (score == 0) {
+        printf("Your %c and %c is not fucked \n", start, end);
+    } else {
+        printf("Your %c and %c is fucked \n", start, end);
     }
 
     fclose(filePointer);
-
-    // Check parenthesis
-    FILE *filePointer1;
-
-    filePointer1 = fopen("tmp.txt", "r");
-
-    int score = 0;
-    while (fgets(line, lineLength, filePointer1))
-    {
-        score = checkParenthesis(line, score);
-    }
-
-    printf("%d", score);
-
-    if (score == 0){
-        printf("Parenthesis isn't fucked \n");
-    } else {
-        printf("Parenthesis is fucked \n");
-    }
-
-    fclose(filePointer1);
 }
 
-int removeComments(char line[], int insideMultilineComment)
-{
-    FILE *pFile;
-    pFile=fopen("tmp.txt", "a");
-
-    int SKIP = 0;
-    
-    int lineIndex = 0;
-    while (line[lineIndex] != '\0')
-    {
-        
-        if ((line[lineIndex] == '/') && (line[lineIndex + 1] == '*') )
-        {
-            insideMultilineComment = 1;
-        } 
-
-        else if ((line[lineIndex] == '/') && (line[lineIndex + 1] == '/')){
-            
-
-            while (line[lineIndex] != '\0')
-            {
-                ++lineIndex;
-            }
-            --lineIndex;
-            SKIP = 1;
-        }
-    
-        else if (line[lineIndex] == '*' && line[lineIndex + 1] == '/'){
-            insideMultilineComment = 0;
-            SKIP = 1;
-        }
-
-        else  if (insideMultilineComment == 1){
-            insideMultilineComment = 1;
-        }
-        else {
-            if (SKIP == 1){
-                SKIP = 0;
-            } else {
-
-                fprintf(pFile, "%c", line[lineIndex]);
-
-                
-            }
-        }
-
-    ++lineIndex;
-
-    } 
-    fclose(pFile);   
-    return insideMultilineComment;
-}
-
-int checkParenthesis(char line[], int score) {
+int checkSyntax(char entry, char end, char line[], int score) {
     int i = 0;
 
-    while (line[i] != EOF) {
+    static int FLAG = 0;
 
-        if (line[i] == '{'){
-             printf("Found a {");
-             score++;
-        }
-        else if (line[i] == '}'){
-             printf("Found a }");
-             score--;
-        }
+    while (line[i] != '\0') {
+
+        if ((line[i] == '/') && (line[i + 1] == '/') ) {
+
+                while (line[i] != '\0') {
+                    i++;
+                }
+            } 
+            else { 
+            if ((line[i] == '/') && (line[i + 1] == '*') ) {
+                FLAG = 1;
+            }
+
+            else if ((line[i] == '*') && (line[i + 1] == '/') ) {
+                FLAG = 0;
+            }
+
+            
+
+            if (FLAG == 0) { 
+                if (line[i] == entry){
+                    score++;
+                }
+                else if (line[i] == end){
+                    score--;
+                }
+            }
+        
 
         i++;
+            }
     }
+
 
     return score;
 
