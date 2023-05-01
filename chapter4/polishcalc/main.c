@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h> // for atof
 #include <string.h>
+#include <ctype.h>
 
 #define MAXOP 100  // max size of operand or operator
 #define NUMBER '0' // signal that a number was found
-
 #define MAXVAL 100 // maximum depth of stack stack
+#define BUFSIZE 100 // make this 1 to ensure there isnt any more than 1 char of push
+// cant push more than 1 if thats it
+
+char buf[BUFSIZE]; // buffer for ungetch
+int bufp = 0;      // next free position in buf
 
 int stack_position = 0; // next free stack position
 double stack[MAXVAL];   // value stack
@@ -19,13 +24,20 @@ void peek(int pos);
 void duplicate(int pos);
 void swap(void);
 void clear(void);
+void ungets(char s[]);
+int getch(void);
+void ungetch(int);
 
 // reverse Polish calculator
 int main()
 {
+
+    char s[MAXOP] = "1 2 +";
+
+    ungets(s);
+
     int type;
     double op2;
-    char s[MAXOP];
 
     while ((type = getop(s)) != EOF)
     {
@@ -46,7 +58,7 @@ int main()
         case '+':
             push(pop() + pop());
             break;
-        case 'c': 
+        case 'c':
             clear();
             break;
         case '*':
@@ -89,8 +101,6 @@ int main()
     return 0;
 }
 
-
-
 // push: push f onto value stack
 
 void push(double f)
@@ -112,11 +122,6 @@ double pop(void)
         return 0.0;
     }
 }
-
-#include <ctype.h>
-
-int getch(void);
-void ungetch(int);
 
 // getop: get next character or numeric operand
 int getop(char s[])
@@ -140,19 +145,17 @@ int getop(char s[])
     return NUMBER;
 }
 
-#define BUFSIZE 100
-char buf[BUFSIZE]; // buffer for ungetch
-int bufp = 0;      // next free position in buf
 int getch(void)
-{ // get a (possibly pushed-back) character
+{ // get a (possibly pushed-back) character 
     return (bufp > 0) ? buf[--bufp] : getchar();
 }
 void ungetch(int c)
 { // push character back on input
     if (bufp >= BUFSIZE)
         printf("ungetch: too many characters\n");
-    else
+    else if (c != EOF) {
         buf[bufp++] = c;
+    }
 }
 
 double mod_double(double x, double y)
@@ -206,10 +209,20 @@ void swap(void)
 void clear(void)
 {
 
-    for (int i = 0; i < stack_position; i++){
+    for (int i = 0; i < stack_position; i++)
+    {
         stack[i] = 0.0;
     }
 
-     stack_position = 0;
+    stack_position = 0;
 }
 
+// ungets: push back string to input
+void ungets(char s[])
+{    
+  size_t i = strlen(s);
+
+  while (i > 0) {
+    ungetch(s[--i]);
+  }
+}
