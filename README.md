@@ -6,7 +6,8 @@ learning c through k&amp;r
 ### why did i do this?
 k&r is pretty much viewed as the standard for C and i liked C when i did it at uni - its simple. 
 it also goes over some really fantastic under the hood stuff like how memory management works, how your favorite unix commands are done up and how data structures like hashmaps are done using pointers and stuff.
-** it also has the best explanation for pointers ive ever encountered (where was this??) ** 
+
+**it also has the best explanation for pointers ive ever encountered - skip to chapter 5 for it** 
 
 ## how did i do it 
 
